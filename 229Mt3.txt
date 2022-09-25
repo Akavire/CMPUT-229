@@ -1,0 +1,105 @@
+Topic 6:
+--------------------------
+Accessing a value from an array:
+Temp = V[k] (assuming integer array)
+v[k] = v[k+1]
+v[k+1] = temp
+	$a1 = k
+	$t0 = temp
+	$a0 = V
+Code:
+	sll $t1, $s1, 2 # $t1 = k * 4 (array offset)
+	add $t1, $a0, $t1 #t1 = v+(k*4) address (4 because integer)
+	lw $t0, 0($t1)   # $t0 = v[k]
+	lw #t2, 4($t1)   # $t2 = v[k+1]
+	sw $t2, 0($t1)   # v[k] = v[k+1]
+	sw $t0, 4($t1)   # v[k+1] = v[k] 
+
+Arrays vs pointers / notes
+--------------------
+- Instruction count and CPI are not good performance indicators in isolation
+- Compiler optimizations are sensitive to the algorithm
+- Nothing can fix a dumb algorithm
+Array indexing involves: multiplying index by element size, adding to array base
+address
+Pointers correspond directly to memory addresses | can avoid indexing directly
+declaring a pointer (just move the address into a temporary register)
+*R (load r from stack, load value of r (*r) for load word pointers
+
+
+Paramater passing
+------------------
+Pass by value: passing a copy
+Pass by reference: pass the reference of an argument in the calling function
+
+Padding:
+the start location of memory (say byte: 56) needs to be divisible by the sizeOf the data type, for example, and integer at location 'x' needs to be divisible by 4, if we cannot do that, we need to add padding from one location to the next
+
+Excercise: write mips code that will place in $v0 the fifth letter of the name of the third student of s, assume s is in $a0
+
+$t0 = $a0
+counter = 0
+lb $t1, 0($a0)
+loop:
+	if $t1 == 0	
+		counter++
+		$a0 = $a0 + 1
+		 j loop
+	if counter == 3
+		$a0 = $a0 + 5
+		lb $t1, 0($a0)
+		move $v0, $t1
+		$jr ra
+	else
+	   	$a0 = $a0 + 1
+		j loop
+	
+Topic 7:
+synchronization: 
+Load linked: ll rt, offset(rs), each processor instantiates its own load link table
+Store conditional (sc $t0, 0($s1): sc rt, offset(rs) (this is essentially a flag)
+	succeeds if location not changed since the ll (returns 1 in rt)
+	fails if location is changed, returns 0 in rt
+- always check with a beq that $rt == 1, if not, try again until so
+
+ 
+	
+ 
+
+
+Topic 9:
+Bitwise addition:
+	- Sum is 1 when A and B are different
+	- Carry is 1 when A and B are both 1
+	- draw a truth table
+	- P = carry propagation
+	- G = carry generation 
+	- C[i+1] = Gi + (Pi and Ci)
+
+Integer addition:
+	over flow if both signs are equal (result is out of range), use unsigned 	instructions to ignore overflow
+	on overflow, save PC in exception program counter EPC register
+
+Multiplication (unsigned)
+	- Long multiplication approach
+	1000 (multiplicand, 32 bits)
+       x 1001 (multiplier, 32 bits)
+	------
+	 1000
+	0000
+       0000
+      1000
+      -------
+      1001000 (product, 64 bits) -- initially 0
+	- the length of the product is the sum of operand lengths
+	- multilply the multiplicand by every bit in the multiplier seperately
+
+MIPS multiplication:
+Two 32-bit registers for product
+HI: most significant 32 bits
+LO: lead significant 32 bits
+Instructions:
+mult rs, rt / multu rs, rt --> 64 bit product in HI/LOW
+mfhi rd / mflo rd --> move HI/LOW to rd
+mul rd, rs,rt --> least significant 32 bits of product
+

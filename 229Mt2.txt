@@ -1,0 +1,26 @@
+Throughput = number of tasks (higher throughput = faster)
+Response time = task duration (1 unit of work) (lower response time = faster)
+
+*Performance = task / execution time
+In comparison: Performance(A) / Performance(B)
+
+*Frequency(of clock speed, like ghz) = # of cycles / time
+*clock cycle time = 1 / frequency
+NOTE: each hz value (ghz = 10^9, mhz = 10^6, has a specific value attached)
+NOTE: higher frequency = better performance // fewer cycles = better performance
+*CPU Time = # of clock cycles x clock cycle time (OR) # of clock cycles / frequency
+* # of clock cycles = # instructions x CPI (average cycle per instruction)
+*** CPU Time = # instructions x CPI x clock cycle time
+NOTE: larger time in seconds = slower
+* CPI = # cycles / # instructions
+*** Time = (instruction count x CPI) / frequency
+
+Amdhall's law
+TimeImproved = (TimeAffected /ImprovementFactor) + TimeUnaffected
+
+
+NOTE: JAL automatically stores $ra, to return to $ra usr jr $ra
+Growing the stack: addi $sp, $sp, -4
+Shrinking the stack: addi $sp, $sp, 4
+Storing ra: Sw $ra, 0($sp)
+NOTE: saved registers ($s), are guarenteed to keep the same value after a function call

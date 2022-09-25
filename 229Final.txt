@@ -1,0 +1,243 @@
+floating point representation (single precision)
+1 bit (sign), next 8 bits (biased exponent) 
+	- an advantage of biased representation is that nonnegative floating point numbers
+	can be treated as integers for comparison purposes
+floating point representation (double precision)
+1 bit(sign), next 11 bits (exponent), 52 bits for fraction
+
+Time between instructions (pipelined) =  
+Time between instructions (non pipelines)/ number of stages
+Stalling pipeline: force control values in ID/EX register to 0
+- Prevent update of PC and IF/ID register
+reducing branch delay: move hardware that determines outcome of branch to the ID stage
+
+
+structural hazards:
+data hazards:
+control hazards:
+load-use-hazard: when ID/Ex.MemRead and ID/Ex.RegisterRt = IF/ID.RegisterRs
+branch hazards: if branch outcome determined in MEM
+
+
+
+------------------------------------------------------------
+Topic 6:
+--------------------------
+Accessing a value from an array:
+Temp = V[k] (assuming integer array)
+v[k] = v[k+1]
+v[k+1] = temp
+	$a1 = k
+	$t0 = temp
+	$a0 = V
+Code:
+	sll $t1, $s1, 2 # $t1 = k * 4 (array offset)
+	add $t1, $a0, $t1 #t1 = v+(k*4) address (4 because integer)
+	lw $t0, 0($t1)   # $t0 = v[k]
+	lw #t2, 4($t1)   # $t2 = v[k+1]
+	sw $t2, 0($t1)   # v[k] = v[k+1]
+	sw $t0, 4($t1)   # v[k+1] = v[k] 
+
+Arrays vs pointers / notes
+--------------------
+- Instruction count and CPI are not good performance indicators in isolation
+- Compiler optimizations are sensitive to the algorithm
+- Nothing can fix a dumb algorithm
+Array indexing involves: multiplying index by element size, adding to array base
+address
+Pointers correspond directly to memory addresses | can avoid indexing directly
+declaring a pointer (just move the address into a temporary register)
+*R (load r from stack, load value of r (*r) for load word pointers
+
+
+Paramater passing
+------------------
+Pass by value: passing a copy
+Pass by reference: pass the reference of an argument in the calling function
+
+Padding:
+the start location of memory (say byte: 56) needs to be divisible by the sizeOf the data type, for example, and integer at location 'x' needs to be divisible by 4, if we cannot do that, we need to add padding from one location to the next
+
+Excercise: write mips code that will place in $v0 the fifth letter of the name of the third student of s, assume s is in $a0
+
+$t0 = $a0
+counter = 0
+lb $t1, 0($a0)
+loop:
+	if $t1 == 0	
+		counter++
+		$a0 = $a0 + 1
+		 j loop
+	if counter == 3
+		$a0 = $a0 + 5
+		lb $t1, 0($a0)
+		move $v0, $t1
+		$jr ra
+	else
+	   	$a0 = $a0 + 1
+		j loop
+	
+Topic 7:
+synchronization: 
+Load linked: ll rt, offset(rs), each processor instantiates its own load link table
+Store conditional (sc $t0, 0($s1): sc rt, offset(rs) (this is essentially a flag)
+	succeeds if location not changed since the ll (returns 1 in rt)
+	fails if location is changed, returns 0 in rt
+- always check with a beq that $rt == 1, if not, try again until so
+
+ 
+	
+ 
+
+
+Topic 9:
+Bitwise addition:
+	- Sum is 1 when A and B are different
+	- Carry is 1 when A and B are both 1
+	- draw a truth table
+	- P = carry propagation
+	- G = carry generation 
+	- C[i+1] = Gi + (Pi and Ci)
+
+Integer addition:
+	over flow if both signs are equal (result is out of range), use unsigned 	instructions to ignore overflow
+	on overflow, save PC in exception program counter EPC register
+
+Multiplication (unsigned)
+	- Long multiplication approach
+	1000 (multiplicand, 32 bits)
+       x 1001 (multiplier, 32 bits)
+	------
+	 1000
+	0000
+       0000
+      1000
+      -------
+      1001000 (product, 64 bits) -- initially 0
+	- the length of the product is the sum of operand lengths
+	- multilply the multiplicand by every bit in the multiplier seperately
+
+MIPS multiplication:
+Two 32-bit registers for product
+HI: most significant 32 bits
+LO: lead significant 32 bits
+Instructions:
+mult rs, rt / multu rs, rt --> 64 bit product in HI/LOW
+mfhi rd / mflo rd --> move HI/LOW to rd
+mul rd, rs,rt --> least significant 32 bits of product
+---------------------------------------------------
+Throughput = number of tasks (higher throughput = faster)
+Response time = task duration (1 unit of work) (lower response time = faster)
+
+*Performance = task / execution time
+In comparison: Performance(A) / Performance(B)
+
+*Frequency(of clock speed, like ghz) = # of cycles / time
+*clock cycle time = 1 / frequency
+NOTE: each hz value (ghz = 10^9, mhz = 10^6, has a specific value attached)
+NOTE: higher frequency = better performance // fewer cycles = better performance
+*CPU Time = # of clock cycles x clock cycle time (OR) # of clock cycles / frequency
+* # of clock cycles = # instructions x CPI (average cycle per instruction)
+*** CPU Time = # instructions x CPI x clock cycle time
+NOTE: larger time in seconds = slower
+* CPI = # cycles / # instructions
+*** Time = (instruction count x CPI) / frequency
+
+Amdhall's law
+TimeImproved = (TimeAffected /ImprovementFactor) + TimeUnaffected
+
+
+NOTE: JAL automatically stores $ra, to return to $ra usr jr $ra
+Growing the stack: addi $sp, $sp, -4
+Shrinking the stack: addi $sp, $sp, 4
+Storing ra: Sw $ra, 0($sp)
+NOTE: saved registers ($s), are guarenteed to keep the same value after a function call
+------------------------------------------------------------------------------------------
+***COMMENT MIPS CODE ON EXAM
+sign bits, 0 = positive, 1 = negative
+
+0xffff fff0 = -16 in decimal
+How?
+1. convert number to binary:
+1111 1111 1111 1111 1111 1111 1111 1111 0000
+2. Take the complement of the number
+0000 0000 0000 0000 0000 0000 0000 0000 1111
+3. convert binary to decimal, add 1
+= 15 + 1 = 16
+4. change sign
+= -16
+--------------------------------------------
+-always fill shift holes with 0s
+- logical operations do not preserve the sign of the input value
+- shift right arithmetic operations preserve the sign, so check the sign bit and fill the remaining bits with that number
+- shift left = x + 2^y where y = shift amount
+- shift right = x / 2^y where y = shift amount
+
+and operations:
+0 0 1 1
+0 1 0 1
+=
+0 0 0 1
+
+or operations:
+0 0 1 1
+0 1 0 1
+=
+0 1 1 1
+
+nor operations:
+0 0 1 1
+0 1 0 1
+=
+1 0 0 0
+
+xor operations:
+0 0 1 1
+0 1 0 1
+=
+0 1 1 0
+----------------------------------
+mips is big endian
+
+lw - loads a value from memory into a register
+sw - stores a value from a register into memory
+a[0] = the address of the first byte of the first element in an array in mips 
+target address of an array = A + sizeof(A) * i (where a = array, and i = index)
+sizeof(a) = 4 bytes for integers, 1 byte for characters
+x = Mem[target_address] = lw $s3, 0($t2) # where we are storing the value in s3 
+
+A[i] = x
+- sll $t1, $t0, 2 # multiply the value in t0 by 2, store it in t1
+- add $t2, $t1, $s6 # add t1,s6, store in t2
+- sw $s3, 0($t2) # Mem[t2] = s3
+
+
+C = name[k]
+assumptions:
+c = $s3
+k = $t0
+base of array 'name' = $s4
+array type = array of 8-bit characters
+
+target = base of name + sizeof(name) * k = base of name + k
+Mips:
+add $t3, $s4, $t0 # getting the index of the array
+lb $s3, 0($t3) # load byte is used because we are only loading one byte
+
+
+branch instructions:
+beq #t1, $t2, label # if t1 == t2, goto label
+bne #t1, $t2, label # if t1 != t2, goto label
+j label  # goto label 
+-----------------------------------------------
+r-type instructions (register)
+
+opcode (6bit) --- rs (source register 1 | 5 bits) --- rt (source register 2 | 5 bits) --- rd (destination | 5 bits) --- shift-amount --- funct
+
+
+i-type instructions (immediate)
+
+opcode (6 bits) --- rs (source register, 5 bits) --- rt (destination, 5 bits) --- immediate (16 bits, two's complement, signed)
+
+
+

@@ -1,0 +1,86 @@
+***COMMENT MIPS CODE ON EXAM
+sign bits, 0 = positive, 1 = negative
+
+0xffff fff0 = -16 in decimal
+How?
+1. convert number to binary:
+1111 1111 1111 1111 1111 1111 1111 1111 0000
+2. Take the complement of the number
+0000 0000 0000 0000 0000 0000 0000 0000 1111
+3. convert binary to decimal, add 1
+= 15 + 1 = 16
+4. change sign
+= -16
+--------------------------------------------
+-always fill shift holes with 0s
+- logical operations do not preserve the sign of the input value
+- shift right arithmetic operations preserve the sign, so check the sign bit and fill the remaining bits with that number
+- shift left = x + 2^y where y = shift amount
+- shift right = x / 2^y where y = shift amount
+
+and operations:
+0 0 1 1
+0 1 0 1
+=
+0 0 0 1
+
+or operations:
+0 0 1 1
+0 1 0 1
+=
+0 1 1 1
+
+nor operations:
+0 0 1 1
+0 1 0 1
+=
+1 0 0 0
+
+xor operations:
+0 0 1 1
+0 1 0 1
+=
+0 1 1 0
+----------------------------------
+mips is big endian
+
+lw - loads a value from memory into a register
+sw - stores a value from a register into memory
+a[0] = the address of the first byte of the first element in an array in mips 
+target address of an array = A + sizeof(A) * i (where a = array, and i = index)
+sizeof(a) = 4 bytes for integers, 1 byte for characters
+x = Mem[target_address] = lw $s3, 0($t2) # where we are storing the value in s3 
+
+A[i] = x
+- sll $t1, $t0, 2 # multiply the value in t0 by 2, store it in t1
+- add $t2, $t1, $s6 # add t1,s6, store in t2
+- sw $s3, 0($t2) # Mem[t2] = s3
+
+
+C = name[k]
+assumptions:
+c = $s3
+k = $t0
+base of array 'name' = $s4
+array type = array of 8-bit characters
+
+target = base of name + sizeof(name) * k = base of name + k
+Mips:
+add $t3, $s4, $t0 # getting the index of the array
+lb $s3, 0($t3) # load byte is used because we are only loading one byte
+
+
+branch instructions:
+beq #t1, $t2, label # if t1 == t2, goto label
+bne #t1, $t2, label # if t1 != t2, goto label
+j label  # goto label 
+-----------------------------------------------
+r-type instructions (register)
+
+opcode (6bit) --- rs (source register 1 | 5 bits) --- rt (source register 2 | 5 bits) --- rd (destination | 5 bits) --- shift-amount --- funct
+
+
+i-type instructions (immediate)
+
+opcode (6 bits) --- rs (source register, 5 bits) --- rt (destination, 5 bits) --- immediate (16 bits, two's complement, signed)
+
